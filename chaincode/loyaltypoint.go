@@ -78,6 +78,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		return t.setNewRate(stub, args)
 	} else if function == "addMCard" {
 		return t.addMCard(stub, args)
+	} else if function == "deleteAllState" {
+		return t.deleteAllState(stub)
 	}
 
 	fmt.Println("invoke did not find func: " + function) //error
@@ -213,5 +215,33 @@ func (t *SimpleChaincode) addMCard(stub shim.ChaincodeStubInterface, args []stri
 	if err != nil {
 		return nil, err
 	}
+
+	return nil, nil
+}
+
+func (t *SimpleChaincode) deleteAllState(stub shim.ChaincodeStubInterface) ([]byte, error) {
+	var err error
+	fmt.Println("running deleteAllState()")
+
+	iter, err := stub.RangeQueryState("", "")
+
+	if err != nil {
+		fmt.Printf("Error deleting table: %s", err)
+		return nil, err
+	}
+	defer iter.Close()
+	for iter.HasNext() {
+		key, _, err := iter.Next()
+		if err != nil {
+			fmt.Printf("Error deleting table: %s", err)
+			return nil, err
+		}
+		err = stub.DelState(key)
+		if err != nil {
+			fmt.Printf("Error deleting table: %s", err)
+			return nil, err
+		}
+	}
+
 	return nil, nil
 }
