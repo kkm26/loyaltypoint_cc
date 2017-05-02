@@ -76,6 +76,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		return t.redeemPoint(stub, args)
 	} else if function == "setNewRate" {
 		return t.setNewRate(stub, args)
+	} else if function == "addMCard" {
+		return t.addMCard(stub, args)
 	}
 
 	fmt.Println("invoke did not find func: " + function) //error
@@ -190,6 +192,24 @@ func (t *SimpleChaincode) setNewRate(stub shim.ChaincodeStubInterface, args []st
 	key = args[0] //rename for fun
 	value = args[1]
 	err = stub.PutState("exRate_"+key, []byte(value)) //write the variable into the chaincode state
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (t *SimpleChaincode) addMCard(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var key, value string
+	var err error
+	fmt.Println("running addMCard()")
+
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 2. m-card id and points to set")
+	}
+
+	key = args[0] //rename for fun
+	value = args[1]
+	err = stub.PutState(key, []byte(value)) //write the variable into the chaincode state
 	if err != nil {
 		return nil, err
 	}
